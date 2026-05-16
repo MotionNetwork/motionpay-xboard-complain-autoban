@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Receive MotionPay webhook notifications and automatically ban users upon payment complaints",
     "author": "MotionNetwork",
-    "url": "https://github.com/user/xboard-motionpay-webhook",
+    "url": "https://github.com/MotionNetwork/motionpay-xboard-complain-autoban",
     "require": {
         "xboard": ">=1.0.0"
     },

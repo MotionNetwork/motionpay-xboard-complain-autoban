@@ -6,6 +6,7 @@ use App\Http\Controllers\PluginController;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class WebhookController extends PluginController
@@ -27,19 +28,22 @@ class WebhookController extends PluginController
             return response('Empty body', 400);
         }
 
-        // 验证签名
+        // 验证签名（密钥未配置时拒绝所有请求）
         $secret = $this->getConfig('webhook_secret', '');
-        if (!empty($secret)) {
-            $receivedSignature = $request->header('X-Webhook-Signature', '');
-            $expectedSignature = hash_hmac('sha256', $rawBody, $secret);
+        if (empty($secret)) {
+            Log::error('[MotionPay Webhook] 签名密钥未配置，拒绝请求');
+            return response('Webhook secret not configured', 500);
+        }
 
-            if (!hash_equals($expectedSignature, $receivedSignature)) {
-                Log::warning('[MotionPay Webhook] 签名验证失败', [
-                    'received' => substr($receivedSignature, 0, 16) . '...',
-                    'ip' => $request->ip(),
-                ]);
-                return response('Invalid signature', 403);
-            }
+        $receivedSignature = $request->header('X-Webhook-Signature', '');
+        $expectedSignature = hash_hmac('sha256', $rawBody, $secret);
+
+        if (!hash_equals($expectedSignature, $receivedSignature)) {
+            Log::warning('[MotionPay Webhook] 签名验证失败', [
+                'received' => substr($receivedSignature, 0, 16) . '...',
+                'ip' => $request->ip(),
+            ]);
+            return response('Invalid signature', 403);
         }
 
         // 解析 payload
@@ -49,13 +53,11 @@ class WebhookController extends PluginController
             return response('Invalid JSON', 400);
         }
 
-        // 时间戳防重放检查（5分钟窗口）
-        if (isset($payload['timestamp'])) {
-            $diff = abs(time() - (int) $payload['timestamp']);
-            if ($diff > 300) {
-                Log::warning('[MotionPay Webhook] 请求已过期', ['diff' => $diff]);
-                return response('Request expired', 403);
-            }
+        // 时间戳防重放检查（必须包含，5分钟窗口）
+        $timestamp = $payload['timestamp'] ?? null;
+        if (!$timestamp || abs(time() - (int) $timestamp) > 300) {
+            Log::warning('[MotionPay Webhook] 请求缺少时间戳或已过期');
+            return response('Request expired', 403);
         }
 
         // 分发事件
@@ -80,6 +82,13 @@ class WebhookController extends PluginController
             Log::info('[MotionPay Webhook] 投诉缺少商户订单号，跳过', ['data' => $data]);
             return response('OK', 200);
         }
+
+        // 幂等性检查：同一投诉不重复处理
+        $cacheKey = 'motionpay_complain:' . $complainTradeNo;
+        if (Cache::has($cacheKey)) {
+            return response('OK', 200);
+        }
+        Cache::put($cacheKey, true, 86400 * 7); // 7天去重
 
         // 通过商户订单号（Xboard 的 trade_no）查找订单
         $order = Order::where('trade_no', $tradeNo)->first();
@@ -109,6 +118,12 @@ class WebhookController extends PluginController
         if ($this->getConfig('auto_ban_enabled', true)) {
             if ($user->banned) {
                 Log::info('[MotionPay Webhook] 用户已处于封禁状态', ['user_id' => $user->id]);
+                return response('OK', 200);
+            }
+
+            // 保护管理员账户
+            if ($user->is_admin) {
+                Log::warning('[MotionPay Webhook] 跳过管理员封禁', ['user_id' => $user->id]);
                 return response('OK', 200);
             }
 
