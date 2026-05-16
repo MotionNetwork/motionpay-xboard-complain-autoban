@@ -128,6 +128,8 @@ class WebhookController extends PluginController
             }
 
             $user->banned = true;
+            $user->uuid = \App\Utils\Helper::guid(true);
+            $user->token = \App\Utils\Helper::guid();
             $user->save();
 
             // 撤销所有登录令牌，强制立即下线
