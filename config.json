@@ -1,0 +1,31 @@
+{
+    "name": "MotionPay Webhook",
+    "code": "motion_pay_webhook",
+    "version": "1.0.0",
+    "description": "Receive MotionPay webhook notifications and automatically ban users upon payment complaints",
+    "author": "MotionNetwork",
+    "url": "https://github.com/user/xboard-motionpay-webhook",
+    "require": {
+        "xboard": ">=1.0.0"
+    },
+    "config": {
+        "webhook_secret": {
+            "type": "string",
+            "default": "",
+            "label": "Webhook 签名密钥",
+            "description": "MotionPay 后台设置的 Webhook 签名密钥，用于验证请求来源"
+        },
+        "auto_ban_enabled": {
+            "type": "boolean",
+            "default": true,
+            "label": "收到投诉自动封禁用户",
+            "description": "开启后，收到投诉通知将自动封禁关联订单的用户"
+        },
+        "ban_on_order_paid": {
+            "type": "boolean",
+            "default": false,
+            "label": "收到新订单通知",
+            "description": "开启后，收到新订单支付通知时记录日志（不做封禁操作）"
+        }
+    }
+}
