@@ -19,7 +19,7 @@
 
 当你使用 [MotionPay](https://motionpay.net) 作为支付通道时，用户可能会在微信/支付宝发起恶意投诉或退款请求。如果不及时封禁，可能会导致用户滥用（白嫖）您的机场订阅。
 
-**MotionPay Guard** 通过实时接收 MotionPay 的 Webhook 通知，在收到投诉的瞬间自动封禁关联用户，从源头阻止滥用行为。
+**MotionPay Xboard Complain AutoBan** 通过实时接收 MotionPay 的 Webhook 通知，在收到投诉的瞬间自动封禁关联用户，从源头阻止滥用行为。
 
 ```
 用户发起支付投诉 → MotionPay 推送 Webhook → 插件自动封禁该用户 ✅
@@ -96,7 +96,7 @@ plugins/
 ┌──────────────┐     Webhook POST      ┌──────────────────────┐
 │              │ ───────────────────▶  │                      │
 │  MotionPay   │   complain.new        │   Xboard Plugin      │
-│  支付系统     │   + HMAC签名          │   MotionPay Guard    │
+│  支付系统     │   + HMAC签名          │   Complain AutoBan   │
 │              │ ◀───────────────────  │                      │
 └──────────────┘     HTTP 200 OK       └──────────┬───────────┘
                                                    │
@@ -226,7 +226,7 @@ MotionPayWebhook/
 
 ### What is this?
 
-MotionPay Guard is an Xboard plugin that automatically bans users when a payment complaint is received from MotionPay. It protects your business from malicious refund requests and chargebacks.
+MotionPay Xboard Complain AutoBan is an Xboard plugin that automatically bans users when a payment complaint is received from MotionPay. It protects your business from malicious refund requests and chargebacks.
 
 ### Quick Start
 
