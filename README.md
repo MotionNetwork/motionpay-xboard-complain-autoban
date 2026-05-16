@@ -55,18 +55,29 @@
 
 ## 📦 安装
 
-### 方式一：Git Clone（推荐）
+### 方式一：后台上传安装（推荐 ⭐）
+
+1. 前往 [Releases](https://github.com/MotionNetwork/motionpay-xboard-complain-autoban/releases) 下载最新版 `MotionPayWebhook-v1.0.0.zip`
+2. 登录 Xboard 管理后台 → **系统设置** → **插件管理** → **上传插件**
+3. 选择下载的 ZIP 文件上传
+4. 找到 **MotionPay Webhook** → 点击 **启用**
+5. 进入插件设置，配置 Webhook 签名密钥
+
+> 💡 这是最简单的安装方式，无需命令行操作。
+
+### 方式二：Git Clone
 
 ```bash
 cd /path/to/xboard/plugins
 git clone https://github.com/MotionNetwork/motionpay-xboard-complain-autoban.git MotionPayWebhook
 ```
 
-### 方式二：手动下载
+然后在管理后台 → 插件管理 → 启用。
 
-1. 下载本仓库的 ZIP 文件
-2. 解压后将文件夹重命名为 `MotionPayWebhook`
-3. 放入 Xboard 的 `plugins/` 目录
+### 方式三：手动下载
+
+1. 下载本仓库的 ZIP 文件并解压
+2. 将文件夹重命名为 `MotionPayWebhook`，放入 Xboard 的 `plugins/` 目录
 
 ```
 plugins/
@@ -80,7 +91,7 @@ plugins/
     └── README.md
 ```
 
-4. 登录 Xboard 管理后台 → **插件管理** → 找到 **MotionPay Webhook** → **启用**
+3. 管理后台 → 插件管理 → 启用
 
 ## ⚙️ 配置
 
