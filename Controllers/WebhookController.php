@@ -130,6 +130,9 @@ class WebhookController extends PluginController
             $user->banned = true;
             $user->save();
 
+            // 撤销所有登录令牌，强制立即下线
+            $user->tokens()->delete();
+
             Log::channel('daily')->warning('[MotionPay Webhook] 已自动封禁用户', [
                 'user_id' => $user->id,
                 'email' => $user->email,
